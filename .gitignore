@@ -1,0 +1,20 @@
+# ROS2 build artifacts
+build/
+install/
+log/
+
+# micro-ROS cloned dependencies (managed by micro_ros_setup scripts)
+src/uros/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+
+# colcon
+COLCON_IGNORE
+
+# OS
+.DS_Store
+Thumbs.db
