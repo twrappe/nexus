@@ -1,0 +1,40 @@
+# Output contract for /ai/event_class
+#
+# The AI event detector must publish a message on this topic for every
+# sensor window it processes. Violations of this contract are FM-01.
+# Absence of a confidence signal on OOD input is FM-07.
+#
+# Checked by: nexus/validation/contract_validator.py
+# Failure modes covered: FM-01 (invalid output structure), FM-05 (silent degradation)
+
+topic: /ai/event_class
+
+# Custom message type — defined in nexus_msgs/msg/EventClassification.msg
+# Fields: int8 event_class, float32 confidence
+message_type: nexus_msgs/EventClassification
+
+fields:
+  event_class:
+    type: int8
+    # Must be one of the defined EventClass values.
+    # Any value outside this set is an immediate contract violation.
+    valid_values: [0, 1, 2]   # 0=NOMINAL, 1=ANOMALY, 2=CRITICAL_EVENT
+    required: true
+
+  confidence:
+    type: float32
+    # Confidence must be a valid probability — no values outside [0.0, 1.0].
+    # A value outside this range indicates a model output error (FM-01).
+    min: 0.0
+    max: 1.0
+    required: true
+
+constraints:
+  # Every published message must satisfy all of the above.
+  # A single non-compliant message is a contract violation — 100% compliance required.
+  compliance_rate: 1.0
+
+  # Absolute confidence floor. A confidence value below this is a contract
+  # violation regardless of event class. Distinct from FM-07 (OOD detection),
+  # which is evaluated by the divergence validator against baseline distributions.
+  confidence_floor: 0.0

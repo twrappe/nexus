@@ -1,0 +1,37 @@
+# Output contract for /system/mode
+#
+# The mode controller publishes the current operational mode on this topic
+# in response to each /ai/event_class message. The mode controller is
+# deterministic — its contract is fully specified by the event_class_to_mode
+# mapping in mode_definitions.yaml.
+#
+# Checked by: nexus/validation/contract_validator.py
+# Failure modes covered: FM-06 (CRITICAL_EVENT -> non-CRITICAL), FM-09 (autonomous CRITICAL recovery)
+
+topic: /system/mode
+
+# Standard message — no custom type needed. The mode controller is a pure
+# function; a plain integer value is a sufficient and universally compatible contract.
+message_type: std_msgs/Int8
+
+fields:
+  data:
+    type: int8
+    # Must be one of the defined OperationalMode values.
+    valid_values: [0, 1, 2]   # 0=NORMAL, 1=DEGRADED, 2=CRITICAL
+    required: true
+
+constraints:
+  compliance_rate: 1.0
+
+  # The mode value must be consistent with the immediately preceding event class,
+  # as defined in mode_definitions.yaml event_class_to_mode.
+  # Violation is a propagation failure — severity depends on which class was missed:
+  #   CRITICAL_EVENT -> non-CRITICAL: FM-06, unconditional failure (S=10)
+  #   ANOMALY -> non-DEGRADED: standard failure
+  #   NOMINAL -> non-NORMAL: standard failure
+  propagation_must_match: true
+
+  # Once CRITICAL is set, it must not transition autonomously to any other mode.
+  # Any such transition is FM-09, unconditional failure.
+  critical_is_terminal: true

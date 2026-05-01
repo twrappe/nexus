@@ -1,0 +1,28 @@
+# Canonical event class and operational mode definitions.
+#
+# This is the single source of truth for the vocabulary shared across all
+# components. No component should hardcode the integer values — they must
+# load from here (or from nexus/nodes/common/mode.py which mirrors these).
+
+event_classes:
+  NOMINAL: 0          # System operating within expected parameters
+  ANOMALY: 1          # Detectable deviation; system continues with reduced output
+  CRITICAL_EVENT: 2   # Failure mode underway or imminent; safe stop required
+
+operational_modes:
+  NORMAL: 0           # Nominal operation
+  DEGRADED: 1         # Reduced output, elevated monitoring, alert active
+  CRITICAL: 2         # Safe stop executed; autonomous operation halted
+
+# Deterministic mapping: event class -> required operational mode.
+# The mode controller implements this as a pure function with no exceptions.
+event_class_to_mode:
+  NOMINAL: NORMAL
+  ANOMALY: DEGRADED
+  CRITICAL_EVENT: CRITICAL
+
+# States from which autonomous recovery is unconditionally forbidden.
+# Any autonomous transition out of a terminal state is FM-09 (S=9, RPN=162).
+# Recovery requires operator intervention.
+terminal_states:
+  - CRITICAL

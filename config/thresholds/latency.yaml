@@ -1,0 +1,23 @@
+# Latency thresholds
+#
+# All values in milliseconds.
+# Checked by: nexus/validation/timing_validator.py
+# Failure modes covered: FM-03 (inference latency), FM-04 (mode transition latency),
+#                        FM-11 (STM32 HIL latency)
+
+# Time from sensor window published on /sensor/stream to classification published
+# on /ai/event_class. Measured on the host (Python/ROS2).
+# Failure mode: FM-03
+inference_latency_host_ms: 20
+
+# Time from sensor window published on /edge/sensor_input to classification
+# published on /edge/event_classification. Measured on STM32 via GPIO timing probe.
+# Two thresholds: nominal load and stressed load (concurrent ROS2 traffic).
+# Failure mode: FM-11
+inference_latency_stm32_nominal_ms: 50
+inference_latency_stm32_stressed_ms: 75
+
+# Time from /ai/event_class published to /system/mode published.
+# Measures the mode controller's response latency, not inference.
+# Failure mode: FM-04
+mode_transition_latency_ms: 10

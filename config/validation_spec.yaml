@@ -1,0 +1,83 @@
+# NEXUS Validation Specification
+#
+# Top-level manifest. References all contracts, thresholds, and defines
+# which failure modes are unconditional vs. threshold-based.
+# Loaded by nexus/reporting/pass_fail_evaluator.py.
+
+version: "1.0"
+
+# External definition files loaded by validators at runtime.
+definitions:
+  modes: config/mode_definitions.yaml
+
+contracts:
+  - config/contracts/event_class_output.yaml
+  - config/contracts/system_mode_output.yaml
+
+thresholds:
+  latency: config/thresholds/latency.yaml
+  rates: config/thresholds/rates.yaml
+
+# Failure mode registry.
+# unconditional: true means a single occurrence is an immediate test failure —
+# no threshold, no rate, no statistical tolerance.
+failure_modes:
+  FM-01:
+    description: "AI output violates message contract (invalid event_class or confidence)"
+    unconditional: false
+    threshold_ref: rates.output_contract_compliance_min
+
+  FM-02:
+    description: "INT8 quantization changes classification vs. FP32 host model"
+    unconditional: false
+    threshold_ref: rates.int8_fp32_agreement_min
+
+  FM-03:
+    description: "Host inference latency exceeds threshold"
+    unconditional: false
+    threshold_ref: latency.inference_latency_host_ms
+
+  FM-04:
+    description: "Mode transition latency exceeds threshold"
+    unconditional: false
+    threshold_ref: latency.mode_transition_latency_ms
+
+  FM-05:
+    description: "Silent degradation — AI output structurally valid but systematically wrong"
+    unconditional: false
+    threshold_ref: rates.output_contract_compliance_min
+
+  FM-06:
+    description: "CRITICAL_EVENT input produces non-CRITICAL output"
+    unconditional: true
+    # Any single miss is an unconditional failure. Severity=10.
+
+  FM-07:
+    description: "OOD input produces silent confident NOMINAL — no uncertainty signal"
+    unconditional: false
+    notes: "Checked via confidence distribution analysis on OOD stimulus set"
+
+  FM-08:
+    description: "NOMINAL input incorrectly classified as CRITICAL_EVENT (false critical)"
+    unconditional: false
+    threshold_ref: rates.false_critical_rate_max
+
+  FM-09:
+    description: "Autonomous recovery from CRITICAL without operator reset"
+    unconditional: true
+    # Zero occurrences permitted. Severity=9.
+
+  FM-10:
+    description: "Communications dropout causes missed mode transition"
+    unconditional: false
+    notes: "Evaluated under injected UART/ROS2 dropout scenarios"
+
+  FM-11:
+    description: "STM32 HIL inference latency exceeds threshold"
+    unconditional: false
+    threshold_ref: latency.inference_latency_stm32_nominal_ms
+
+  FM-12:
+    description: "Watchdog failure — node stops publishing without error"
+    unconditional: false
+    notes: "Checked via heartbeat monitoring in nexus_monitor_node"
