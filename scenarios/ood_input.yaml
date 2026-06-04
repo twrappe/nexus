@@ -1,0 +1,28 @@
+# Scenario: OOD Input
+# Out-of-distribution sensor windows injected into a nominal stream.
+# Validates FM-07: AI must not silently output confident NOMINAL on OOD input.
+
+name: ood_input
+description: >
+  OOD windows injected mid-stream. The AI node must produce an explicit
+  uncertainty signal (elevated uncertainty, non-NOMINAL classification, or
+  flagged output) rather than silently confident NOMINAL.
+
+duration_s: 30
+publish_rate_hz: 10
+
+steps:
+  - event_class: NOMINAL
+    duration_s: 10
+    fault: null
+  - event_class: NOMINAL
+    duration_s: 10
+    fault: ood
+  - event_class: NOMINAL
+    duration_s: 10
+    fault: null
+
+expected_outcomes:
+  - fault: ood
+    requirement: uncertainty_signal_present  # FM-07
+    silent_confident_nominal_allowed: false

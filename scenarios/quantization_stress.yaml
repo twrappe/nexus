@@ -1,0 +1,28 @@
+# Scenario: Quantization Stress
+# Borderline inputs designed to expose INT8 vs FP32 divergence (FM-02).
+# Requires STM32 HIL. Inputs are near class boundaries to maximise divergence risk.
+
+name: quantization_stress
+description: >
+  Near-boundary sensor windows sent to both host FP32 model and STM32 INT8
+  model. INT8/FP32 agreement must be >= 98%. Any NORMAL↔CRITICAL disagreement
+  is an unconditional critical divergence.
+
+duration_s: 60
+publish_rate_hz: 10
+requires_hil: true
+
+steps:
+  - event_class: borderline_nominal_anomaly
+    duration_s: 20
+    fault: null
+  - event_class: borderline_anomaly_critical
+    duration_s: 20
+    fault: null
+  - event_class: NOMINAL
+    duration_s: 20
+    fault: null
+
+expected_outcomes:
+  - requirement: int8_fp32_agreement_gte_98_percent  # FM-02
+  - requirement: no_normal_critical_divergence

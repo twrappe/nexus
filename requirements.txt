@@ -1,0 +1,15 @@
+# NEXUS host-side Python dependencies
+
+# ROS2 Python client library (installed with ROS2 Humble)
+# rclpy
+
+# Validation and testing
+pytest>=7.0
+pytest-html>=3.2
+numpy>=1.24
+
+# YAML config loading
+PyYAML>=6.0
+
+# Optional: TFLite runtime for host FP32 model (FM-02 divergence testing)
+# tflite-runtime>=2.13

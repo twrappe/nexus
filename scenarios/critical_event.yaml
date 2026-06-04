@@ -1,0 +1,27 @@
+# Scenario: Critical Event
+# Sudden CRITICAL_EVENT input. Validates CRITICAL transition and terminal state.
+# Any failure to reach CRITICAL, or autonomous recovery from it, is FM-06/FM-09.
+
+name: critical_event
+description: >
+  Sensor stream transitions abruptly from NOMINAL to CRITICAL_EVENT.
+  Mode controller must reach CRITICAL and remain there.
+
+duration_s: 20
+publish_rate_hz: 10
+
+steps:
+  - event_class: NOMINAL
+    duration_s: 5
+    fault: null
+  - event_class: CRITICAL_EVENT
+    duration_s: 15
+    fault: null
+
+expected_outcomes:
+  - ai_output: NOMINAL
+    mode: NORMAL
+  - ai_output: CRITICAL_EVENT
+    mode: CRITICAL
+    must_hold: true
+    unconditional_failure_on_miss: true  # FM-06

@@ -1,0 +1,27 @@
+# Scenario: Communications Dropout
+# /sensor/stream goes silent for N cycles mid-run.
+# Validates FM-05: stale output must be flagged; system must not autonomously recover.
+
+name: comms_dropout
+description: >
+  Nominal stream drops out for 5 seconds then resumes. The AI node must flag
+  its output as stale and must not republish the last known classification
+  silently. Mode controller must hold last known state.
+
+duration_s: 30
+publish_rate_hz: 10
+
+steps:
+  - event_class: NOMINAL
+    duration_s: 10
+    fault: null
+  - fault: dropped_input
+    duration_s: 5
+  - event_class: NOMINAL
+    duration_s: 15
+    fault: null
+
+expected_outcomes:
+  - fault: dropped_input
+    requirement: stale_output_flagged  # FM-05
+    silent_republish_allowed: false

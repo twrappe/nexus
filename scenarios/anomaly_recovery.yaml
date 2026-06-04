@@ -1,0 +1,31 @@
+# Scenario: Anomaly Recovery
+# NOMINAL → ANOMALY → recovery back to NOMINAL.
+# Validates DEGRADED transition and correct recovery to NORMAL.
+
+name: anomaly_recovery
+description: >
+  Sensor stream transitions from NOMINAL to ANOMALY then recovers. Mode
+  controller must transition NORMAL → DEGRADED → NORMAL.
+
+duration_s: 30
+publish_rate_hz: 10
+
+steps:
+  - event_class: NOMINAL
+    duration_s: 10
+    fault: null
+  - event_class: ANOMALY
+    duration_s: 10
+    fault: null
+  - event_class: NOMINAL
+    duration_s: 10
+    fault: null
+
+expected_outcomes:
+  - ai_output: NOMINAL
+    mode: NORMAL
+  - ai_output: ANOMALY
+    mode: DEGRADED
+  - ai_output: NOMINAL
+    mode: NORMAL
+    violations: []
